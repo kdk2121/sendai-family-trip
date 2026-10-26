@@ -7,6 +7,7 @@
 <title>센다이 금토일 · 쇼핑과 휴식</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 /* 레이아웃: 한 줄 세로 흐름. 고정 알약 내비 → 항공편 → 쇼핑 체크리스트 → 요일 타임라인 → 숙소·팁 → 면세 */
@@ -119,6 +120,23 @@ details b{color:var(--ink);font-weight:500}
 .tax-row .how{min-width:0;font-size:.92rem}
 .warn{background:var(--part-soft);border-left:4px solid var(--part);padding:12px 14px;border-radius:8px;font-size:.9rem;margin:12px 0 0}
 .small{color:var(--muted);font-size:.86rem}
+#map{height:360px;border-radius:14px;border:1px solid var(--line);overflow:hidden;background:var(--surface);z-index:0}
+.map-tabs{display:flex;gap:6px;margin:0 0 10px}
+.map-tabs button{font:inherit;font-size:.86rem;padding:6px 14px;border-radius:999px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);cursor:pointer}
+.map-tabs button.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.map-tabs button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.pins{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.pins li{display:flex;gap:10px;align-items:flex-start;font-size:.9rem}
+.pin-body{min-width:0;color:var(--muted)}
+.pin-body b{color:var(--ink);font-weight:500}
+.pins .map{margin:0 0 0 4px}
+.pin{flex:none;width:24px;height:24px;border-radius:50%;display:inline-grid;place-items:center;
+  font-size:.75rem;font-weight:700;color:#fff;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35)}
+.c-home{background:#2c4a8c}
+.c-shop{background:#c2410c}
+.c-move{background:#4b5563}
+.leaflet-container{font-family:var(--font-body)}
 footer .wrap{padding-block:0 40px;color:var(--muted);font-size:.82rem}
 @media (max-width:360px){.tax-row{grid-template-columns:1fr;gap:2px}}
 @media (prefers-reduced-motion: no-preference){html{scroll-behavior:smooth}}
@@ -141,6 +159,7 @@ footer .wrap{padding-block:0 40px;color:var(--muted);font-size:.82rem}
   <ul>
     <li><a href="#flight">항공편</a></li>
     <li><a href="#shops">쇼핑 목록</a></li>
+    <li><a href="#map-sec">지도</a></li>
     <li><a href="#fri">금</a></li>
     <li><a href="#sat">토</a></li>
     <li><a href="#sun">일</a></li>
@@ -193,6 +212,24 @@ footer .wrap{padding-block:0 40px;color:var(--muted);font-size:.82rem}
           센다이역에서 걸어서 약 10분, 지하철 아오바도리역에서 약 5분이에요.</span></span></label></li>
       </ul>
     </div>
+  </section>
+
+  <section id="map-sec">
+    <h2>지도</h2>
+    <div class="map-tabs" role="group" aria-label="지도 범위">
+      <button type="button" id="view-city" class="on">시내</button>
+      <button type="button" id="view-all">공항까지</button>
+    </div>
+    <div id="map" role="region" aria-label="센다이 일정 지도"></div>
+    <ol class="pins">
+      <li><span class="pin c-home">H</span><span class="pin-body"><b>호텔 메트로폴리탄 센다이</b> · 센다이역 서쪽 출구 1분 <a class="map" href="https://www.google.com/maps/search/?api=1&query=%E3%83%9B%E3%83%86%E3%83%AB%E3%83%A1%E3%83%88%E3%83%AD%E3%83%9D%E3%83%AA%E3%82%BF%E3%83%B3%E4%BB%99%E5%8F%B0" target="_blank" rel="noopener">구글 지도</a></span></li>
+      <li><span class="pin c-shop">1</span><span class="pin-body"><b>파르코2 바오바오</b> · 호텔에서 걸어서 2~3분 <a class="map" href="https://www.google.com/maps/search/?api=1&query=%E4%BB%99%E5%8F%B0%E3%83%91%E3%83%AB%E3%82%B32" target="_blank" rel="noopener">구글 지도</a></span></li>
+      <li><span class="pin c-shop">2</span><span class="pin-body"><b>몽벨 센다이점</b> · 역에서 약 700m, 걸어서 10분 <a class="map" href="https://www.google.com/maps/search/?api=1&query=%E3%83%A2%E3%83%B3%E3%83%99%E3%83%AB%20%E4%BB%99%E5%8F%B0%E5%BA%97" target="_blank" rel="noopener">구글 지도</a></span></li>
+      <li><span class="pin c-shop">3</span><span class="pin-body"><b>라라가든 나가마치 아카짱혼포</b> · 나가마치미나미역 바로 앞, 역에서 남쪽 약 4km <a class="map" href="https://www.google.com/maps/search/?api=1&query=%E3%83%A9%E3%83%A9%E3%82%AC%E3%83%BC%E3%83%87%E3%83%B3%E9%95%B7%E7%94%BA" target="_blank" rel="noopener">구글 지도</a></span></li>
+      <li><span class="pin c-move">S</span><span class="pin-body"><b>JR 센다이역</b> · 공항선과 지하철 난보쿠선 타는 곳</span></li>
+      <li><span class="pin c-move">✈</span><span class="pin-body"><b>센다이 공항</b> · 센다이역에서 남동쪽 약 15km, 열차 17~25분</span></li>
+    </ol>
+    <p class="small">위치는 오픈스트리트맵 기준이에요. 거리는 직선거리라 실제 걷는 길은 조금 더 길어요.</p>
   </section>
 
   <section id="fri">
@@ -315,6 +352,41 @@ footer .wrap{padding-block:0 40px;color:var(--muted);font-size:.82rem}
       try{ localStorage.setItem('sdj-'+b.dataset.k, b.checked?'1':'0'); }catch(e){}
     });
   });
+})();
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function(){
+  if(!window.L) return;
+  var places=[
+    {k:'H',c:'c-home',n:'호텔 메트로폴리탄 센다이',d:'센다이역 서쪽 출구 1분',p:[38.2588960,140.8811183],city:true},
+    {k:'1',c:'c-shop',n:'파르코2 바오바오',d:'금 13:15',p:[38.2589561,140.8795858],city:true},
+    {k:'2',c:'c-shop',n:'몽벨 센다이점',d:'금 15:00',p:[38.2597638,140.8745209],city:true},
+    {k:'3',c:'c-shop',n:'라라가든 나가마치 아카짱혼포',d:'토 10:15',p:[38.2252234,140.8758899],city:true},
+    {k:'S',c:'c-move',n:'JR 센다이역',d:'공항선·난보쿠선',p:[38.2603516,140.8823921],city:true},
+    {k:'✈',c:'c-move',n:'센다이 공항',d:'금 11:45 도착 · 일 12:45 출발',p:[38.1377913,140.9216114],city:false}
+  ];
+  var map=L.map('map',{scrollWheelZoom:false});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:19,attribution:'&copy; OpenStreetMap contributors'
+  }).addTo(map);
+  var cityPts=[],allPts=[];
+  places.forEach(function(x){
+    var icon=L.divIcon({className:'',html:'<span class="pin '+x.c+'">'+x.k+'</span>',iconSize:[24,24],iconAnchor:[12,12]});
+    L.marker(x.p,{icon:icon,title:x.n}).addTo(map).bindPopup('<b>'+x.n+'</b><br>'+x.d);
+    allPts.push(x.p); if(x.city) cityPts.push(x.p);
+  });
+  // 지하철 난보쿠선(센다이역 → 나가마치미나미) 대략 경로, 공항선은 직선
+  L.polyline([[38.2603516,140.8823921],[38.2244453,140.8762448]],{color:'#2c4a8c',weight:3,dashArray:'6 6',opacity:.7}).addTo(map);
+  L.polyline([[38.2603516,140.8823921],[38.1377913,140.9216114]],{color:'#4b5563',weight:3,dashArray:'2 8',opacity:.6}).addTo(map);
+  var city=document.getElementById('view-city'),all=document.getElementById('view-all');
+  function show(pts,btn){
+    map.fitBounds(pts,{padding:[28,28]});
+    city.classList.toggle('on',btn===city); all.classList.toggle('on',btn===all);
+  }
+  city.addEventListener('click',function(){show(cityPts,city);});
+  all.addEventListener('click',function(){show(allPts,all);});
+  show(cityPts,city);
 })();
 </script>
 </body>
